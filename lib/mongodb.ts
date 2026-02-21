@@ -5,7 +5,20 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+
+// Serverless-optimized MongoDB connection options with TLS settings
+const options = {
+  maxPoolSize: 10,           // Maximum connection pool size for serverless
+  minPoolSize: 2,            // Minimum connections to maintain
+  maxIdleTimeMS: 30000,      // Close idle connections after 30s
+  serverSelectionTimeoutMS: 10000, // Server selection timeout
+  socketTimeoutMS: 45000,    // Socket timeout
+  connectTimeoutMS: 10000,   // Connection timeout
+  retryWrites: true,         // Retry failed writes
+  retryReads: true,          // Retry failed reads
+  tls: true,                 // Enable TLS for secure connection
+  tlsAllowInvalidCertificates: true // Allow self-signed certificates (match Python config)
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
@@ -27,7 +40,7 @@ if (process.env.NODE_ENV === 'development') {
 
 export async function getDatabase(): Promise<Db> {
   const client = await clientPromise;
-  return client.db('telegram_bot_manager');
+  return client.db('applications'); // Use 'applications' database like working Python project
 }
 
 export default clientPromise;
