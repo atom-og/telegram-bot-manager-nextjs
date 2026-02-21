@@ -13,9 +13,11 @@ export default function Home() {
     name: '',
     description: '',
     token: '',
+    systemPrompt: '',
     active: true
   });
   const [showTokens, setShowTokens] = useState<Record<string, boolean>>({});
+  const [showPrompts, setShowPrompts] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function Home() {
       await loadBots();
       setShowForm(false);
       setEditingBot(null);
-      setFormData({ name: '', description: '', token: '', active: true });
+      setFormData({ name: '', description: '', token: '', systemPrompt: '', active: true });
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to save bot');
@@ -59,6 +61,7 @@ export default function Home() {
       name: bot.name,
       description: bot.description,
       token: bot.token,
+      systemPrompt: bot.systemPrompt,
       active: bot.active
     });
     setShowForm(true);
@@ -93,7 +96,7 @@ export default function Home() {
   const resetForm = () => {
     setShowForm(false);
     setEditingBot(null);
-    setFormData({ name: '', description: '', token: '', active: true });
+    setFormData({ name: '', description: '', token: '', systemPrompt: '', active: true });
     setError(null);
   };
 
@@ -160,8 +163,8 @@ export default function Home() {
                     <button
                       onClick={() => toggleActive(bot)}
                       className={`px-4 py-2 font-bold text-sm border-3 border-black ${
-                        bot.active 
-                          ? 'bg-[#00ff88] text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' 
+                        bot.active
+                          ? 'bg-[#00ff88] text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                           : 'bg-[#ff3366] text-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
                       } transition-all duration-150`}
                     >
@@ -185,6 +188,23 @@ export default function Home() {
                       {showTokens[bot.id] ? bot.token : maskToken(bot.token)}
                     </div>
                   </div>
+
+                  {bot.systemPrompt && (
+                    <div className="bg-[#e8f4ff] border-3 border-black p-4 mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-gray-600">System Prompt:</span>
+                        <button
+                          onClick={() => setShowPrompts(prev => ({ ...prev, [bot.id]: !prev[bot.id] }))}
+                          className="text-[#0066ff] font-bold text-sm hover:text-[#ff3366]"
+                        >
+                          {showPrompts[bot.id] ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                      <div className={`text-sm ${showPrompts[bot.id] ? '' : 'line-clamp-2'}`}>
+                        {showPrompts[bot.id] ? bot.systemPrompt : bot.systemPrompt.slice(0, 150) + '...'}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex gap-3">
                     <button
@@ -239,7 +259,7 @@ export default function Home() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3 border-3 border-black focus:outline-none focus:border-[#0066ff]"
-                  rows={3}
+                  rows={2}
                   placeholder="Enter bot description"
                 />
               </div>
@@ -253,6 +273,17 @@ export default function Home() {
                   className="w-full px-4 py-3 border-3 border-black focus:outline-none focus:border-[#0066ff] font-mono"
                   placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
                 />
+              </div>
+              <div className="mb-6">
+                <label className="block font-bold text-black mb-2">System Prompt</label>
+                <textarea
+                  value={formData.systemPrompt}
+                  onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
+                  className="w-full px-4 py-3 border-3 border-black focus:outline-none focus:border-[#0066ff] font-mono"
+                  rows={5}
+                  placeholder="Enter system prompt for the bot..."
+                />
+                <p className="text-xs text-gray-500 mt-2">Optional: Define the bot's behavior and instructions</p>
               </div>
               <div className="mb-6">
                 <label className="flex items-center gap-3 font-bold text-black">

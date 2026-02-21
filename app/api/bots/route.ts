@@ -13,9 +13,10 @@ export async function GET() {
     const serializedBots = bots.map((bot: any) => ({
       id: bot._id.toString(),
       name: bot.name,
-      description: bot.description,
+      description: bot.description || '',
       token: bot.token,
-      active: bot.active,
+      systemPrompt: bot.systemPrompt || '',
+      active: bot.active ?? true,
       createdAt: bot.createdAt,
       updatedAt: bot.updatedAt
     }));
@@ -30,7 +31,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, token, active } = body;
+    const { name, description, token, systemPrompt, active } = body;
     
     if (!name || !token) {
       return NextResponse.json({ error: 'Name and token are required' }, { status: 400 });
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
       name,
       description: description || '',
       token,
+      systemPrompt: systemPrompt || '',
       active: active !== undefined ? active : true,
       createdAt: new Date(),
       updatedAt: new Date()

@@ -9,7 +9,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, description, token, active } = body;
+    const { name, description, token, systemPrompt, active } = body;
     
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid bot ID' }, { status: 400 });
@@ -23,6 +23,7 @@ export async function PUT(
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (token !== undefined) updateData.token = token;
+    if (systemPrompt !== undefined) updateData.systemPrompt = systemPrompt;
     if (active !== undefined) updateData.active = active;
     
     const result = await db.collection('bots').updateOne(
@@ -43,9 +44,10 @@ export async function PUT(
     const serializedBot = {
       id: updatedBot._id.toString(),
       name: updatedBot.name,
-      description: updatedBot.description,
+      description: updatedBot.description || '',
       token: updatedBot.token,
-      active: updatedBot.active,
+      systemPrompt: updatedBot.systemPrompt || '',
+      active: updatedBot.active ?? true,
       createdAt: updatedBot.createdAt,
       updatedAt: updatedBot.updatedAt
     };
